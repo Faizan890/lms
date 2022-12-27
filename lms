@@ -1,0 +1,262 @@
+CREATE TABLE books(
+  isbn char(13)  ,
+  title varchar(80) ,
+  author varchar(80) ,
+  category varchar(80),
+  price int,
+  copies int
+);
+insert into books values('0000545010225', 'Harry Potter and the Deathly Hallows', 'J. K. Rowling', 'Fiction', 550, 30);
+insert into books values('0000553103547', 'A Game of Thrones', 'George R. R. Martin', 'Fiction', 500, 10);
+insert into books values('0000553106635', 'A Storm of Swords', 'George R. R. Martin', 'Fiction', 550, 15);
+insert into books values('0000553108034', 'A Clash of Kings', 'George R. R. Martin', 'Fiction', 500, 10);
+insert into books values('0000553801503', 'A Feast for Crows', 'George R. R. Martin', 'Fiction', 600, 20);
+insert into books values('0000747532699', 'Harry Potter and the Philosopher''s Stone', 'J. K. Rowling', 'Fiction', 300, 12);
+insert into books values('0000747538492', 'Harry Potter and the Chamber of Secrets', 'J. K. Rowling', 'Fiction', 300, 10);
+insert into books values('0000747542155', 'Harry Potter and the Prisoner of Azkaban', 'J. K. Rowling', 'Fiction', 350, 16);
+insert into books values('0000747546240', 'Harry Potter and the Goblet of Fire', 'J. K. Rowling', 'Fiction', 400, 15);
+insert into books values('0000747551006', 'Harry Potter and the Order of the Phoenix', 'J. K. Rowling', 'Fiction', 400, 20);
+insert into books values('0000747581088', 'Harry Potter and the Half-Blood Prince', 'J. K. Rowling', 'Fiction', 500, 25);
+insert into books values('9780066620992', 'Good to Great', 'Jim Collins', 'Non-fiction', 300, 10);
+insert into books values('9780241257555', 'The Pigeon Tunnel', 'John le CarrÃ©', 'Non-fiction', 200, 25);
+insert into books values('9780439023511', 'Mockingjay', 'Suzanne Collins', 'Fiction', 500, 20);
+insert into books values('9780439023528', 'The Hunger Games', 'Suzanne Collins', 'Fiction', 400, 10);
+insert into books values('9780545227247', 'Catching Fire', 'Suzanne Collins', 'Fiction', 400, 14);
+insert into books values('9780553801477', 'A Dance with Dragons', 'George R. R. Martin', 'Fiction', 600, 30);
+insert into books values('9780967752808', 'Sandbox Wisdom', 'Tom Asacker', 'Non-fiction', 250, 5);
+insert into books values('9781501141515', 'Born to Run', 'Bruce Springsteen', 'Non-fiction', 250, 20);
+insert into books values('9788183331630', 'Let Us C', 'Yashavant Kanetkar', 'Education', 200, 22);
+insert into books values('9789350776667', 'Computer Graphics and Virtual Reality', 'Sanjesh S. Pawale', 'Education', 100, 30);
+insert into books values('9789350776773', 'Microcontroller and Embedded Systems', 'Harish G. Narula', 'Education', 80, 15);
+insert into books values('9789350777077', 'Advanced Database Management Systems', 'Mahesh Mali', 'Education', 60, 29);
+insert into books values('9789350777121', 'Operating Systems', 'Rajesh Kadu', 'Education', 50, 24);
+insert into books values('9789351194545', 'Open Source Technologies', 'Dayanand Ambawade', 'Education', 100, 20);
+insert into books values('9789381626719', 'Stay Hungry Stay Foolish', 'Rashmi Bansal', 'Non-fiction', 100, 5);
+select *from books;
+------------------
+create table mostly_issued(
+isbn char(90)
+);
+insert into mostly_issued values('0000545010225');
+insert into mostly_issued values('0000553103547');
+insert into mostly_issued values('9789350777077');
+insert into mostly_issued values('9789381626719');
+insert into mostly_issued values('9789350776667');
+insert into mostly_issued values('9781501141515');
+
+
+/////////////////////////////////joints
+SELECT isbn FROM book
+UNION
+SELECT isbn FROM  mostly_issued;
+
+
+
+//////////////////////////////////////////
+CREATE TABLE book_issue(
+issue_id int,
+member varchar(20),
+book_isbn varchar(20),
+due_date varchar(30),
+last_reminded varchar(30)
+);
+
+//////////////////////////////////////////////////////--------------------------
+
+CREATE TABLE table_library_branch (
+library_branch_BranchID int ,
+library_branch_BranchName VARCHAR(100) , 
+library_branch_BranchAddress VARCHAR(200) 
+);
+SELECT *FROM table_library_branch;
+CREATE TABLE table_borrower (
+CardNo INT ,
+BorrowerName VARCHAR(100) NOT NULL,
+BorrowerAddress VARCHAR(200) NOT NULL,
+BorrowerPhone VARCHAR(50) 
+);
+-----------
+CREATE TABLE table_book_copies (
+ CopiesID int,
+ BookID INT NOT NULL,
+ BranchID INT NOT NULL ,
+ No_Of_Copies INT 
+);
+INSERT INTO values(1,
+SELECT *FROM table_book_copies ;
+
+CREATE TABLE table_book_authors (
+ AuthorID INT ,
+ BookID INT, 
+ AuthorName VARCHAR(50) NOT NULL
+);
+  SELECT *FROM table_book_authors;
+////////////////////////////////////////////////////////////
+CREATE TRIGGER issue_book7 
+BEFORE INSERT ON  book_issue
+ FOR EACH ROW 
+ BEGIN
+
+  SET NEW.due_date = DATE_ADD(CURRENT_DATE, INTERVAL 20 DAY);
+
+    UPDATE book_issue  SET balance = balance - (SELECT price FROM book WHERE isbn = NEW.book_isbn) WHERE username = NEW.member;
+
+    UPDATE books SET copies = copies - 1 WHERE isbn = NEW.book_isbn;
+
+    DELETE FROM pending_book_requests WHERE member = NEW.member AND book_isbn = NEW.book_isbn;
+
+END;
+/////////////////////////////////////////////////////////
+CREATE TRIGGER return_book11 BEFORE DELETE ON book_issue
+
+ FOR EACH ROW BEGIN
+
+    UPDATE books SET balance = balance + (SELECT price FROM book WHERE isbn = OLD.isbn) WHERE username = OLD.member;
+
+    UPDATE books SET copies = copies+1 WHERE isbn = old.isbn;
+
+END;
+////////////////////////////////TABLE FOR THE RECORDS OF LIBRARIAN'S
+create table librarian(
+id int,
+username varchar(20),
+password char(40)
+);
+insert into  librarian values(1,'ROBERT','123ROBERT');
+insert into  librarian values(2,'PATRIC','456PATRIC');
+insert into  librarian values(3,'SAM','123SAMP');
+insert into  librarian values(4,'MANNA','123MANNA');
+insert into  librarian values(5,'ALICE','123'ALICE);
+
+select *from librarian;
+////////////////////////////////////////////////TABLE FOR THE MEMEBERS WHICH CAN AVAIL EXTRA FACILITIES AND THE RECORD OF AVAILED BOOKS 
+create table member2(
+id int,
+username varchar(20) not null,
+password char(40),
+name varchar(80),
+email varchar(80),
+balance int
+);
+INSERT INTO MEMBER2 VALUES(1,'RAM','123RAM','RAM MANOHAR','RAM@GMAIL.COM',2);
+INSERT INTO MEMBER2 VALUES(2,'SHYAM','123SHYAM','SHYAM  MANOHAR','SHYAM@GMAIL.COM',0);
+INSERT INTO MEMBER2 VALUES(3,'ADITYA','123ADITYA','ADITYA KUMAR','ADITYA@GMAIL.COM',0);
+INSERT INTO MEMBER2 VALUES(4,'OM','123OM','OM PRAKASH','OM@GMAIL.COM',6);
+INSERT INTO MEMBER2 VALUES(5,'RAHUL','123RAHUL','RAHUL SINGH','RAHUL@GMAIL.COM',3);
+INSERT INTO MEMBER2 VALUES(6,'FAIZAN','123FAIZAN','FAIZAN QURESHI','FAIZAN@GMAIL.COM',6);
+INSERT INTO MEMBER2 VALUES(7,'ABDUL','123ABDUL','ABDUL MANNAN','ABDUL@GMAIL.COM',1);
+INSERT INTO MEMBER2 VALUES(8,'KALRA','123KALRA','KALRA BAN ','BAN@GMAIL.COM',12);
+INSERT INTO MEMBER2 VALUES(9,'AYUSH ','123AYUSH','AYUSH KUMAR','AYUSH@GMAIL.COM',2);
+INSERT INTO MEMBER2 VALUES(10,'NEHA','123NEHA','NEHA SINGH','NEHA@GMAIL.COM',5);
+
+select *from member2;
+
+
+
+
+
+
+////////////////////////////////////////////
+create trigger add_number1 after insert on member
+  for each row delete from pending_registration where username=new.username;
+ end;
+/////////////////////////////////////////////////
+create trigger remove_member after delete on member
+ for each row deleted from pending_book_requests where member=old.username
+end;
+////////////////////////////////////////////////
+
+create table pending_book_requests(
+request_id int,
+member varchar(20) ,
+book_isbn varchar(30),
+time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+/////////////////////////
+create table pending_registration
+(
+username varchar(30) not null,
+password char(20), not null'
+name varchar(40) not null,
+email varchar(20) not null,
+balance int(10),
+  time timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+)
+select * from pending_registration;
+(
+ALTER table book
+ add primary key(isbn);
+alter table book_issue
+add primary key(issue_id);
+ alter table librarian
+add primary key(id),add unique key username;
+ALTER table member2
+ add primary key(id),add unique key(username),add unique key(email);
+alter table pending_book_requests
+add primary key request_id;
+alter table pending_registrations
+add primary key;
+ALTER TABLE mostly_issued
+ add foreign key(isbn);
+//////////////////////////////////////////////////////////////
+declare
+title books.title%type;
+author books.author%type;
+ISBN books.ISBN%type;
+CATEGORY books.CATEGORY%type;
+PRICE books.PRICE%type;
+COPIES books.COPIES%type;
+
+begin
+ISBN:=:ISBN;
+title:=:Enter_title;
+author:=:Enter_author;
+CATEGORY:=:CATAGORY;
+PRICE:=:PRICE;
+COPIES:=:COPIES;
+
+INSERT INTO BOOKS (ISBN,TITLE,AUTHOR,CATEGORY,PRICE,COPIES) VALUES(ISBN,TITLE,AUTHOR,CATEGORY,PRICE,COPIES);
+
+dbms_output.put_line(title   || '   named book is available');
+End;
+select * from books
+
+declare
+title books.title%type;
+author books.author%type;
+ISBN books.ISBN%type;
+CATEGORY books.CATEGORY%type;
+PRICE books.PRICE%type;
+COPIES books.COPIES%type;
+I varchar(30);
+
+begin
+
+i:=:Enter_Book_ISBN;
+
+SELECT ISBN,TITLE,AUTHOR,CATEGORY,PRICE,COPIES
+INTO ISBN,TITLE,AUTHOR,CATEGORY,PRICE,COPIES 
+FROM BOOKS 
+WHERE ISBN=I;
+
+dbms_output.put_line(ISBN    );
+dbms_output.put_line(author  );
+dbms_output.put_line(title   );
+dbms_output.put_line(category);
+dbms_output.put_line(price   );
+dbms_output.put_line(copies  );
+dbms_output.put_line('The Book is Issued Successfully');
+End;
+
+declare
+I varchar(30);
+
+begin
+
+i:=:delete;
+
+delete from books where ISBN=I;
+
+
+End;
+select *from books;
